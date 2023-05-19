@@ -2,6 +2,8 @@ import os
 import json
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
+
 
 url = 'https://www.flexjobs.com/search?'
 # Menganalisa website
@@ -26,11 +28,11 @@ res = requests.get(url, params=params, headers=headers)
 # print(soup.prettify())
 # Scraping Total Pages
 # 1. buat fungsi get total page
-def get_total_page():
+def get_total_page(search, location, country):
     params = {
-        'search': 'Python Developer',
-        'location': 'Manchester, United Kingdom',
-        'country': 'United Kingdom'
+        'search': search,
+        'location': location,
+        'country': country
     }
 
     res = requests.get(url, params=params, headers=headers)
@@ -67,12 +69,13 @@ def get_total_page():
 
 # Scraping job item
 # buat fungsi baru get_all_item
-def get_all_item():
+def get_all_item(search, location, country, nous, page):
     # copas params
     params = {
-        'search': 'Python Developer',
-        'location': 'Manchester, United Kingdom',
-        'country': 'United Kingdom'
+        'search': search,
+        'location': location,
+        'nous': nous,
+        'country': country
     }
     # kita buat request dulu dan panggil url lalu masukkan params dan headers
     res = requests.get(url, params=params, headers=headers)
@@ -131,12 +134,77 @@ def get_all_item():
     except FileExistsError:
         pass
     # buat file json baru dgn fungsi with
-    with open('json_result/job_list.json', 'w+') as json_data:
+    with open(f'json_result/{search}_in_{location}_page_{page}.json', 'w+') as json_data:
         json.dump(jobs_list, json_data)
     print('json created')
+    return jobs_list
+
+# Mengolah hasil scraping menjadi CSV atau Excel
+# kita butuh library pandas dan openpyxl
+    # create CSV
+    # df = pd.DataFrame(jobs_list)
+    # df.to_csv('flexjobs_data.csv', index=False)
+    # df.to_excel('flexjobs_data.xlsx', index=False)
+
+    # data created
+    # print('Data Created Success')
+
+# Finishing scraping project
+# buat fungsi baru namanya run
+# cek paramater website pada page berikutnya
+# jika ada tambahan parameter maka masukan ke params
+
+
+# buat fungsi baru create document
+def create_document(dataFrame, filename):
+
+    # dan buat direktori baru
+    try:
+        os.mkdir('data_result')
+    except FileExistsError:
+        pass
+
+    df = pd.DataFrame(dataFrame)
+    df.to_csv(f'data_result/{filename}.csv', index=False)
+    df.to_excel(f'data_result/{filename}.xlsx', index=False)
+    # buat penanda dengan print
+    print(f'File {filename}.csv and {filename}.xlsx successfully created')
+# panggil fungsi get total page
+def run():
+    search = input('Enter Your Search: ')
+    location = input('Enter Your Location: ')
+    country = input('Enter Your Country: ')
+
+    total = get_total_page(search, location, country)
+    # buat counter
+    counter = 0
+    final_result = []
+    # buat looping
+    for page in range(total):
+        page += 1
+        counter += 1
+        final_result += get_all_item(search, location, counter, page)
+
+    #  formatong data
+    try:
+        os.mkdir('report')
+    except FileExistsError:
+        pass
+
+    with open('reports/{}.json.'.format(query), 'w+') as final_data:
+        json.dump(final_result, final_data)
+
+    print('Data Json Created')
+
+    # create_document
+    create_document(final_result, query)
+
+
+
+
 
 # untuk menjalankan file kita ketik main
 # dan masukkan fungsinya get_total_page()
 # untuk menjalankan fungsi yang berbeda dapat diganti sesuai fungsi yg ingin dijalankan
 if __name__ == '__main__':
-    get_all_item()
+    run()

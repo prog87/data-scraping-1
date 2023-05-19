@@ -1,4 +1,5 @@
 import os
+import json
 import requests
 from bs4 import BeautifulSoup
 
@@ -6,14 +7,17 @@ url = 'https://www.flexjobs.com/search?'
 # Menganalisa website
 # 1. buat paramater dengan variabel params dengan dictionary {}, dan tambahkan pada Var res
 params = {
-    'search':'Python Developer',
+    'search': 'Python Developer',
     'location': 'Manchester, United Kingdom',
     'country': 'United Kingdom'
 }
 # 2. buat user agent dengan variabel headers dgn dict {}, dan tambahkan pada Var res
-headers = {'user-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'}
+headers = {
+    'user-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'}
 
 res = requests.get(url, params=params, headers=headers)
+
+
 # mengecek status code
 # print(res.status_code)
 
@@ -60,6 +64,7 @@ def get_total_page():
     # jika sudah dapat nilai tertinggi, maka kita return
     return total_pages
 
+
 # Scraping job item
 # buat fungsi baru get_all_item
 def get_all_item():
@@ -90,7 +95,7 @@ def get_all_item():
     # Remote
     # place
 
-    jobs_list = []    # list buat nampung data yg dari looping
+    jobs_list = []  # list buat nampung data yg dari looping
     # karena sudah didapat find allnya, berarti kita tinggal looping itemnya
     for item in contents:
         title = item.find('a', 'job-title job-link').text
@@ -106,7 +111,7 @@ def get_all_item():
             'place': place
         }
         # print(data_dict)
-        jobs_list.append(data_dict) # kemudian keluar looping
+        jobs_list.append(data_dict)  # kemudian keluar looping
         # jika ingin menjadikan 1 format data kita buat list
         # kita buat list diluar looping
 
@@ -116,10 +121,22 @@ def get_all_item():
     # lebih simpel
     # print(f'jumlah data: {len(jobs_list)}')
 
+# Mengolah hasil scraping menjadi json file
+# import json
+
+    # writing json file
+    # buat direktori json baru
+    try:
+        os.mkdir('json_result')
+    except FileExistsError:
+        pass
+    # buat file json baru dgn fungsi with
+    with open('json_result/job_list.json', 'w+') as json_data:
+        json.dump(jobs_list, json_data)
+    print('json created')
+
 # untuk menjalankan file kita ketik main
 # dan masukkan fungsinya get_total_page()
 # untuk menjalankan fungsi yang berbeda dapat diganti sesuai fungsi yg ingin dijalankan
 if __name__ == '__main__':
     get_all_item()
-
-

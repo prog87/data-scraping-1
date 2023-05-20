@@ -69,7 +69,7 @@ def get_total_page(search, location, country):
 
 # Scraping job item
 # buat fungsi baru get_all_item
-def get_all_item(search, location, country, nous, page):
+def get_all_item(search, location, country, nous, page=1):
     # copas params
     params = {
         'search': search,
@@ -191,13 +191,13 @@ def run():
     except FileExistsError:
         pass
 
-    with open('reports/{}.json.'.format(query), 'w+') as final_data:
+    with open('report/{}.json.'.format(search), 'w+') as final_data:
         json.dump(final_result, final_data)
 
     print('Data Json Created')
 
     # create_document
-    create_document(final_result, query)
+    create_document(final_result, search)
 
 
 
